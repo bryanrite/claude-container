@@ -22,7 +22,7 @@ claude-container
 
 This will:
 
-1. Build the `claude-container` Docker image on first run
+1. Build the `claude-container` Docker image if it doesn't already exist.
 2. Create a `.claude/` directory in the current project for config and credentials
 3. Mount the current directory as `/workspace` and start Claude Code
 
@@ -40,17 +40,7 @@ claude-container --resume
 | `.claude/config/` | `/root/.claude` |
 | `.claude/claude.json` | `/root/.claude.json` |
 
-## Upgrading
-
-To rebuild the container with the latest Claude Code:
-
-```bash
-docker rmi claude-container
-```
-
-The image will be rebuilt automatically on next run. All settings, conversation history, and volume mounts are stored in the project's `.claude/` directory and are preserved across rebuilds.
-
-## Extra Volumes
+## Additional Volumes
 
 To mount additional directories (e.g. shared libraries or sibling repos), create a `.claude/volumes` file:
 
@@ -63,10 +53,21 @@ To mount additional directories (e.g. shared libraries or sibling repos), create
 
 Lines starting with `#` and blank lines are ignored.
 
-## Gitignore
+## Gitignore/Dockerignore
 
-Add `.claude/` to your project's `.gitignore` — it contains local config and credentials that shouldn't be committed:
+Add `.claude/` to your project's `.gitignore` and `.dockerignore` — it contains local config and credentials that shouldn't be committed:
 
 ```bash
 echo '.claude/' >> .gitignore
+echo '.claude/' >> .dockerignore
 ```
+
+## Upgrading Claude
+
+To upgrade claude, rebuild the container, it will install the latest claude code.
+
+```bash
+docker rmi claude-container
+```
+
+The image will be rebuilt automatically on next run. All settings, conversation history, and volume mounts are stored in the project's `.claude/` directory and are preserved across rebuilds.

@@ -6,9 +6,19 @@ SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
 WORK_DIR="$(pwd)"
 CLAUDE_DIR="${WORK_DIR}/.claude"
 
-if ! docker image inspect "$IMAGE_NAME" &>/dev/null; then
+build_image() {
   echo "Building ${IMAGE_NAME} image..."
-  docker build -t "$IMAGE_NAME" "$SCRIPT_DIR"
+  docker build "${@}" -t "$IMAGE_NAME" "$SCRIPT_DIR"
+}
+
+if [[ "${1:-}" == "rebuild" ]]; then
+  build_image --no-cache
+  echo "Rebuild complete."
+  exit 0
+fi
+
+if ! docker image inspect "$IMAGE_NAME" &>/dev/null; then
+  build_image
 fi
 
 mkdir -p "${CLAUDE_DIR}/config"

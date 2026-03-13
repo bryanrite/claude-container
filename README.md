@@ -67,7 +67,7 @@ echo '.claude/' >> .dockerignore
 To upgrade claude, rebuild the container, it will install the latest claude code.
 
 ```bash
-docker rmi claude-container
+claude-container rebuild
 ```
 
-The image will be rebuilt automatically on next run. All settings, conversation history, and volume mounts are stored in the project's `.claude/` directory and are preserved across rebuilds.
+This removes the cached image and rebuilds it from scratch. All settings, conversation history, and volume mounts are stored in the project's `.claude/` directory and are preserved across rebuilds.

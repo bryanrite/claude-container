@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+IMAGE_NAME="claude-container"
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
+WORK_DIR="$(pwd)"
+CLAUDE_DIR="${WORK_DIR}/.claude"
+
+if ! docker image inspect "$IMAGE_NAME" &>/dev/null; then
+  echo "Building ${IMAGE_NAME} image..."
+  docker build -t "$IMAGE_NAME" "$SCRIPT_DIR"
+fi
+
+mkdir -p "${CLAUDE_DIR}/config"
+[[ -s "${CLAUDE_DIR}/claude.json" ]] || echo '{}' > "${CLAUDE_DIR}/claude.json"
+
+VOLUME_ARGS=()
+
+if [[ -f "${CLAUDE_DIR}/volumes" ]]; then
+  while IFS= read -r line; do
+    [[ -z "$line" || "$line" == \#* ]] && continue
+    SRC="${line%%:*}"
+    DEST="${line#*:}"
+    SRC="$(cd "$(dirname "$SRC")" && pwd)/$(basename "$SRC")"
+    VOLUME_ARGS+=(-v "${SRC}:${DEST}")
+  done < "${CLAUDE_DIR}/volumes"
+fi
+
+exec docker run --rm -it \
+  -v "${WORK_DIR}:/workspace" \
+  -v "${CLAUDE_DIR}/config:/root/.claude" \
+  -v "${CLAUDE_DIR}/claude.json:/root/.claude.json" \
+  "${VOLUME_ARGS[@]+"${VOLUME_ARGS[@]}"}" \
+  -w /workspace \
+  "$IMAGE_NAME" "$@"

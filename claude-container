@@ -26,10 +26,12 @@ if [[ -f "${CLAUDE_DIR}/volumes" ]]; then
   done < "${CLAUDE_DIR}/volumes"
 fi
 
-exec docker run --rm -it \
+CID=$(docker create -it --init \
   -v "${WORK_DIR}:/workspace" \
   -v "${CLAUDE_DIR}/config:/root/.claude" \
   -v "${CLAUDE_DIR}/claude.json:/root/.claude.json" \
   "${VOLUME_ARGS[@]+"${VOLUME_ARGS[@]}"}" \
   -w /workspace \
-  "$IMAGE_NAME" "$@"
+  "$IMAGE_NAME" "$@")
+trap 'docker rm "$CID" >/dev/null 2>&1' EXIT
+docker start --attach --interactive "$CID"

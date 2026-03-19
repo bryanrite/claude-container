@@ -8,7 +8,7 @@ CLAUDE_DIR="${WORK_DIR}/.claude"
 
 build_image() {
   echo "Building ${IMAGE_NAME} image..."
-  docker build "${@}" -t "$IMAGE_NAME" "$SCRIPT_DIR"
+  docker build ${@+"${@}"} -t "$IMAGE_NAME" "$SCRIPT_DIR"
 }
 
 if [[ "${1:-}" == "rebuild" ]]; then
